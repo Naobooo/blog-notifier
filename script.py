@@ -27,18 +27,18 @@ def get_latest_article():
     soup = BeautifulSoup(response.text, "html.parser")
 
     print("🔍 取得したHTMLの一部:")
-    print(soup.prettify()[:1000])  # 最初の1000文字だけ出力
+    print(soup.prettify()[:1000])  # 最初の1000文字だけ出力（長すぎるとGitHub Actionsのログに影響）
 
-    # 記事リストの div を探す
-    article_list = soup.find("div", class_="blog_index_main")
-    if article_list is None:
-        print("❌ ブログのHTML構造が変更された可能性があります！")
+    # 記事リストの div を探す（新しいクラス名に変更）
+    article = soup.find("div", class_="entry")
+    if article is None:
+        print("❌ ブログのHTML構造が変更された可能性があります！（`div.entry` が見つかりません）")
         return None, None
 
-    # 記事のリンクを探す
-    link_tag = article_list.find("div", class_="blog_index_title").find("a")
+    # 記事のタイトルリンクを取得
+    link_tag = article.find("h2", class_="title").find("a")
     if link_tag is None:
-        print("❌ 記事のリンクが見つかりません！")
+        print("❌ 記事のリンクが見つかりません！（`h2.title > a` が見つかりません）")
         return None, None
 
     latest_link = link_tag["href"]
@@ -58,3 +58,4 @@ def main():
 # スクリプト実行
 if __name__ == "__main__":
     main()
+
