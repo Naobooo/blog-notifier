@@ -1,0 +1,23 @@
+name: Blog Checker
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 毎時0分に実行（1時間ごと）
+
+jobs:
+  check_blog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリの内容を取得
+        uses: actions/checkout@v3
+
+      - name: Python をセットアップ
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+
+      - name: 必要なライブラリをインストール
+        run: pip install beautifulsoup4 requests
+
+      - name: ブログの更新をチェック
+        run: python script.py
