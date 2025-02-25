@@ -29,8 +29,8 @@ def get_latest_article():
 
         print("✅ ページの読み込み完了！")
 
-        # 最新記事のリンクを取得
-        latest_article = driver.find_element(By.XPATH, '//div[@class="blog_index_title"]/a')
+        # 最新記事のリンクを取得（XPathを修正）
+        latest_article = driver.find_element(By.XPATH, '//div[contains(@class, "entry")]//h2[contains(@class, "title")]/a')
         latest_title = latest_article.text
         latest_link = latest_article.get_attribute("href")
 
