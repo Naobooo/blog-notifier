@@ -1,52 +1,26 @@
-import os
-import time
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from webdriver_manager.chrome import ChromeDriverManager
+import feedparser
 
-BLOG_URL = "https://blog.goo.ne.jp/shinanren"
+RSS_FEED_URL = "https://blog.goo.ne.jp/shinanren/index.rdf"
 
 def get_latest_article():
-    """Seleniumを使って最新記事のタイトルとリンクを取得する"""
-    print("🔍 ブログにアクセス中（Selenium使用）...")
+    """RSSフィードを解析して最新記事のタイトルとURLを取得する"""
+    print("🔍 RSSフィードを取得中...")
 
-    # Chromeドライバーのセットアップ
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # ヘッドレスモード（画面なし）
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+    feed = feedparser.parse(RSS_FEED_URL)
 
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-
-    try:
-        # ブログのトップページを開く
-        driver.get(BLOG_URL)
-        time.sleep(5)  # 読み込み待機
-
-        print("✅ ページの読み込み完了！")
-
-        # 最新記事のリンクを取得（XPathを正確に指定）
-        latest_article = driver.find_element(By.XPATH, '//div[contains(@class, "blog_index_title")]/a')
-        latest_title = latest_article.text
-        latest_link = latest_article.get_attribute("href")
-
-        print(f"✅ 最新記事: {latest_title} ({latest_link})")
-        return latest_link, latest_title
-
-    except Exception as e:
-        print(f"❌ 記事の取得中にエラーが発生: {e}")
+    if not feed.entries:
+        print("❌ RSSフィードに記事がありません！")
         return None, None
 
-    finally:
-        driver.quit()  # ドライバーを終了
+    latest_entry = feed.entries[0]  # 一番最新の記事を取得
+    latest_title = latest_entry.title
+    latest_link = latest_entry.link
+
+    print(f"✅ 最新記事: {latest_title} ({latest_link})")
+    return latest_link, latest_title
 
 def main():
-    print("🚀 `script.py` が実行されました！（Selenium版）")
+    print("🚀 `script.py` が実行されました！（RSS版）")
     latest_link, latest_title = get_latest_article()
     if latest_link is None:
         print("⚠️ 最新記事が取得できませんでした。スクリプトを終了します。")
