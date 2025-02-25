@@ -67,3 +67,26 @@ def check_and_notify():
 
 # スクリプト実行
 check_and_notify()
+def get_latest_article():
+    response = requests.get(BLOG_URL)
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    print("🔍 取得したHTMLの一部（デバッグ用）:")
+    print(soup.prettify())  # ← これでHTMLを出力！
+
+    # 記事リストの div を探す
+    article_list = soup.find("div", class_="entrylist")  # ここが間違っている可能性大！
+    if article_list is None:
+        raise ValueError("❌ ブログのHTML構造が変更された可能性があります！")
+
+    # 記事のリンクを探す
+    link_tag = article_list.find("a")
+    if link_tag is None:
+        raise ValueError("❌ 記事のリンクが見つかりません！")
+
+    latest_link = link_tag["href"]
+    latest_title = link_tag.text.strip()
+
+    print(f"✅ 最新記事: {latest_title} ({latest_link})")
+    return latest_link, latest_title
+
