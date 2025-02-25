@@ -41,14 +41,16 @@ def get_latest_article():
     print("🔍 取得したHTMLの一部:")
     print(soup.prettify()[:1000])  # 最初の1000文字だけ出力
 
-    article = soup.find("div", class_="entry")  # 最新記事の親クラスを探す
-    if article is None:
-        print("❌ 記事リストが見つかりません！")
+    # 記事リストの div を探す（正しいクラス名に修正）
+    article_list = soup.find("div", class_="blog_index_list")
+    if article_list is None:
+        print("❌ 記事リストが見つかりません！（`div.blog_index_list` が見つからない）")
         return None, None
 
-    link_tag = article.find("h2", class_="title").find("a")
+    # 記事のタイトルリンクを取得
+    link_tag = article_list.find("div", class_="blog_index_title").find("a")
     if link_tag is None:
-        print("❌ 記事のリンクが見つかりません！")
+        print("❌ 記事のリンクが見つかりません！（`div.blog_index_title > a` が見つからない）")
         return None, None
 
     latest_link = link_tag["href"]
@@ -66,5 +68,8 @@ def main():
     print("🆕 最新記事の情報が取得されました！")
 
 # スクリプト実行
+if __name__ == "__main__":
+    main()
+
 if __name__ == "__main__":
     main()
