@@ -1,32 +1,31 @@
-import feedparser
+name: Blog Checker
 
-RSS_FEED_URL = "https://blog.goo.ne.jp/shinanren/index.rdf"
+on:
+  schedule:
+    - cron: "0 * * * *"  # 1時間ごとに実行
+  workflow_dispatch:  # 手動実行可能
 
-def get_latest_article():
-    """RSSフィードを解析して最新記事のタイトルとURLを取得する"""
-    print("🔍 RSSフィードを取得中...")
+jobs:
+  check_blog:
+    runs-on: ubuntu-latest
 
-    feed = feedparser.parse(RSS_FEED_URL)
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v3
 
-    if not feed.entries:
-        print("❌ RSSフィードに記事がありません！")
-        return None, None
+      - name: Python をセットアップ
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
 
-    latest_entry = feed.entries[0]  # 一番最新の記事を取得
-    latest_title = latest_entry.title
-    latest_link = latest_entry.link
+      - name: 依存関係をインストール
+        run: |
+          pip install feedparser requests
 
-    print(f"✅ 最新記事: {latest_title} ({latest_link})")
-    return latest_link, latest_title
+      - name: 環境変数を設定
+        env:
+          LINE_ACCESS_TOKEN: ${{ secrets.LINE_ACCESS_TOKEN }}
+          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
 
-def main():
-    print("🚀 `script.py` が実行されました！（RSS版）")
-    latest_link, latest_title = get_latest_article()
-    if latest_link is None:
-        print("⚠️ 最新記事が取得できませんでした。スクリプトを終了します。")
-        return
-    print("🆕 最新記事の情報が取得されました！")
-
-# スクリプト実行
-if __name__ == "__main__":
-    main()
+      - name: ブログの最新記事をチェック & LINE通知
+        run: python script.py
