@@ -6,7 +6,7 @@ RSS_FEED_URL = "https://blog.goo.ne.jp/shinanren/index.rdf"
 
 # 環境変数からLINE APIの設定を取得
 LINE_ACCESS_TOKEN = os.getenv("LINE_ACCESS_TOKEN")
-LINE_USER_ID = os.getenv("LINE_USER_ID")  # 個人LINE ID
+LINE_USER_ID = os.getenv("LINE_USER_ID")  # 送信先ユーザーID
 
 def get_latest_article():
     """RSSフィードを解析して最新記事のタイトルとURLを取得する"""
@@ -27,6 +27,15 @@ def get_latest_article():
 
 def send_line_message(message):
     """LINEに通知を送る"""
+    if not LINE_ACCESS_TOKEN:
+        print("❌ LINE_ACCESS_TOKEN が設定されていません！")
+        return
+    if not LINE_USER_ID:
+        print("❌ LINE_USER_ID が設定されていません！")
+        return
+
+    print(f"📩 送信先LINE_USER_ID: {LINE_USER_ID}")  # デバッグ用
+
     url = "https://api.line.me/v2/bot/message/push"
     headers = {
         "Content-Type": "application/json",
