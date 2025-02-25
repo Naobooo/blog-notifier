@@ -3,6 +3,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 
 BLOG_URL = "https://blog.goo.ne.jp/shinanren"
@@ -23,14 +24,14 @@ def get_latest_article():
     driver = webdriver.Chrome(service=service, options=options)
 
     try:
-        # ブログページを開く
+        # ブログのトップページを開く
         driver.get(BLOG_URL)
         time.sleep(5)  # 読み込み待機
 
         print("✅ ページの読み込み完了！")
 
-        # 最新記事のリンクを取得（XPathを修正）
-        latest_article = driver.find_element(By.XPATH, '//div[contains(@class, "entry")]//h2[contains(@class, "title")]/a')
+        # 最新記事のリンクを取得（XPathを正確に指定）
+        latest_article = driver.find_element(By.XPATH, '//div[contains(@class, "blog_index_title")]/a')
         latest_title = latest_article.text
         latest_link = latest_article.get_attribute("href")
 
@@ -55,4 +56,3 @@ def main():
 # スクリプト実行
 if __name__ == "__main__":
     main()
-
