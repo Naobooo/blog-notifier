@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '0 * * * *'  # 毎時0分に実行（1時間ごと）
 
+  workflow_dispatch:  # ← これがないと手動実行できない！
+
 jobs:
   check_blog:
     runs-on: ubuntu-latest
