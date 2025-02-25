@@ -20,7 +20,7 @@ jobs:
 
       - name: 依存関係をインストール
         run: |
-          pip install beautifulsoup4 requests selenium webdriver-manager
+          pip install feedparser
 
       - name: ブログの最新記事をチェック
         run: python script.py
