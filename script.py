@@ -1,31 +1,61 @@
-name: Blog Checker
+import feedparser
+import requests
+import os
 
-on:
-  schedule:
-    - cron: "0 * * * *"  # 1時間ごとに実行
-  workflow_dispatch:  # 手動実行可能
+RSS_FEED_URL = "https://blog.goo.ne.jp/shinanren/index.rdf"
 
-jobs:
-  check_blog:
-    runs-on: ubuntu-latest
+# 環境変数からLINE APIの設定を取得
+LINE_ACCESS_TOKEN = os.getenv("LINE_ACCESS_TOKEN")
+LINE_USER_ID = os.getenv("LINE_USER_ID")  # 個人LINE ID
 
-    steps:
-      - name: リポジトリをチェックアウト
-        uses: actions/checkout@v3
+def get_latest_article():
+    """RSSフィードを解析して最新記事のタイトルとURLを取得する"""
+    print("🔍 RSSフィードを取得中...")
 
-      - name: Python をセットアップ
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
+    feed = feedparser.parse(RSS_FEED_URL)
 
-      - name: 依存関係をインストール
-        run: |
-          pip install feedparser requests
+    if not feed.entries:
+        print("❌ RSSフィードに記事がありません！")
+        return None, None
 
-      - name: 環境変数を設定
-        env:
-          LINE_ACCESS_TOKEN: ${{ secrets.LINE_ACCESS_TOKEN }}
-          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+    latest_entry = feed.entries[0]  # 一番最新の記事を取得
+    latest_title = latest_entry.title
+    latest_link = latest_entry.link
 
-      - name: ブログの最新記事をチェック & LINE通知
-        run: python script.py
+    print(f"✅ 最新記事: {latest_title} ({latest_link})")
+    return latest_link, latest_title
+
+def send_line_message(message):
+    """LINEに通知を送る"""
+    url = "https://api.line.me/v2/bot/message/push"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {LINE_ACCESS_TOKEN}"
+    }
+    data = {
+        "to": LINE_USER_ID,
+        "messages": [{"type": "text", "text": message}]
+    }
+
+    response = requests.post(url, json=data, headers=headers)
+    print(f"✅ LINE API のレスポンス: {response.status_code} {response.text}")
+
+    if response.status_code != 200:
+        print("❌ LINE通知に失敗しました！")
+        print(f"レスポンス: {response.text}")
+
+def main():
+    print("🚀 `script.py` が実行されました！（RSS + LINE通知版）")
+    latest_link, latest_title = get_latest_article()
+    if latest_link is None:
+        print("⚠️ 最新記事が取得できませんでした。スクリプトを終了します。")
+        return
+
+    message = f"🆕 新しい記事が投稿されました！\n📌 {latest_title}\n🔗 {latest_link}"
+    send_line_message(message)
+
+    print("✅ LINE通知が送信されました！")
+
+# スクリプト実行
+if __name__ == "__main__":
+    main()
